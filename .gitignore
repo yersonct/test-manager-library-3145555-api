@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+/vendor/
+/storage/*.key
+/storage/logs/*.log
+/storage/app/covers/*
+!/storage/app/covers/.gitkeep
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/bootstrap/cache/*.php
+/phpunit.cache/

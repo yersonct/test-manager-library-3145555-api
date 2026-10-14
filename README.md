@@ -1,50 +1,58 @@
-# test-manager-library-3145555-api
+# Manager Library API
 
-> **Prueba técnica · Ficha ADSO 3145555**
-> Horario: **miércoles 14 de octubre de 2026, de 6:50 a. m. a 11:00 a. m.** (hora Colombia). Entrega a las **11:00 a. m.**
+REST backend for Manager Library, built with PHP 8.2+, Laravel 12, and PostgreSQL 16. This repository contains the API only. The React frontend, infrastructure containers, public website, and demo seeder are maintained in their respective repositories.
 
-Este repositorio es el **backend** de *Manager Library*, en **PHP con Laravel**. **Empieza vacío a propósito**: se construye en el fork de cada aprendiz.
+## Functional scope
 
-## Instrucciones
+The API implements authentication for administrators and librarians, fixed categories, a book catalog with covers, members, loans with per-item returns, overdue-loan listing, and a most-borrowed-books report. It does not include fines, reservations, renewals, notifications, bulk import, branches, or book attributes beyond title, author, ISBN, category, copies, and cover.
 
-Cada aprendiz debe **crear el fork** de los seis repositorios del proyecto y **resolver el proyecto
-con el spec planteado**.
+The language-independent product behavior is documented in the sibling `test-manager-library-3145555-docs` repository. PHP/Laravel and React are the selected implementation stack. Code, route, and database identifiers use English; messages presented to users remain in Spanish.
 
-1. Hacer fork, a su cuenta de GitHub, de cada repositorio de la tabla del final.
-2. Leer el spec en [`test-manager-library-3145555-docs`](https://github.com/code-sena/test-manager-library-3145555-docs).
-   Se entrega en dos versiones: `spec-python/` y `spec-.net/`.
-3. Desarrollar en los forks.
+## Contract clarifications
 
-## El reto se desarrolla con React y PHP (Laravel)
+- The cover section requires `GET /books/{id}/cover`, although the route is missing from the endpoint table. The API implements it so clients can retrieve the image referenced by `cover_key`.
+- The authentication row omits the authorization scheme. Clients send the Bearer scheme specified by the login example and security section.
+- ADR-002 refers to a version token that is absent from the physical model. To preserve the documented six-table schema, the API reserves copies using a conditional atomic update inside a transaction; no version column is added.
+- Category names shown in the UI remain the Spanish catalog values specified by the product. Table names, columns, routes, and implementation identifiers use English.
 
-El spec está escrito para Python y para .NET, pero el reto **no** se hace en esos lenguajes:
+The initial migration enables `ck_book_total_positive` and `ck_user_role` immediately rather than postponing them to a later task. This strengthens PostgreSQL invariants without adding business tables or columns.
 
-| Capa | Tecnología del reto |
-|---|---|
-| Frontend | React |
-| Backend | PHP con Laravel |
+## Implemented routes
 
-Lo que el spec define sobre el negocio —historias, criterios de aceptación, reglas, contrato de la
-API, modelo de datos— se respeta. Lo que define sobre la tecnología se traduce a React y Laravel.
+All routes except `GET /health` and `POST /api/v1/auth/login` require a Bearer token.
 
-## La prueba no consiste en escribir el código
+| Method | Route | Access |
+|---|---|---|
+| GET | `/health` | Public |
+| POST | `/api/v1/auth/login` | Public |
+| POST | `/api/v1/users` | admin |
+| GET | `/api/v1/categories` | Authenticated |
+| GET, POST | `/api/v1/books` | Read: authenticated; create: admin |
+| GET, PUT, DELETE | `/api/v1/books/{id}` | Read: authenticated; write: admin |
+| GET, PUT, DELETE | `/api/v1/books/{id}/cover` | Read: authenticated; write: admin |
+| GET, POST | `/api/v1/members` | admin, librarian |
+| GET | `/api/v1/members/{id}` | admin, librarian |
+| GET, POST | `/api/v1/loans` | admin, librarian |
+| GET | `/api/v1/loans/{id}` | admin, librarian |
+| GET | `/api/v1/loans/overdue` | admin, librarian |
+| POST | `/api/v1/loans/{loan_id}/items/{item_id}/return` | admin, librarian |
+| GET | `/api/v1/reports/most-borrowed` | admin |
 
-El propósito principal es ver la **capacidad de desempeño con SDD** (*Spec-Driven Development*,
-desarrollo guiado por especificación): cómo se lee, se interpreta y se aplica una especificación
-para llevarla a un stack distinto. El código es el medio, no el fin.
+## Setup and run
 
-## Entrega
+Requirements: PHP 8.2+ with `pdo_pgsql`, `mbstring`, and `fileinfo`; Composer 2; and PostgreSQL 16. The business schema starts empty. The application migrations create its tables, indexes, constraints, and categories.
 
-Cuenta lo que quede **subido a los forks antes de las 11:00 a. m.** Lo que llegue después no se revisa.
-No hay prórroga: suban avances parciales con commits pequeños durante la prueba.
+1. Run `composer install`.
+2. Copy `.env.example` to `.env` and set `APP_KEY`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `CORS_ORIGIN`.
+3. Run `php artisan key:generate` if `APP_KEY` is not already set.
+4. Create the PostgreSQL database and grant access to the application user. The initial migration creates the `library` schema.
+5. Run `php artisan migrate --force`.
+6. Start the API with `php artisan serve`.
 
-## Los seis repositorios
+After migrations run, the HTTP application idempotently provisions the initial administrator from environment credentials. You can also run `php artisan library:provision-admin` explicitly. Migrations do not store credentials or create that user. Do not configure `DB_CONNECTION=sqlite`: the required partial indexes, constraints, and concurrency behavior depend on PostgreSQL.
 
-| Repositorio | Qué va ahí |
-|---|---|
-| [`test-manager-library-3145555-docs`](https://github.com/code-sena/test-manager-library-3145555-docs) | El spec: `spec-python/` y `spec-.net/` |
-| [`test-manager-library-3145555-api`](https://github.com/code-sena/test-manager-library-3145555-api) | Backend en PHP (Laravel) |
-| [`test-manager-library-3145555-app`](https://github.com/code-sena/test-manager-library-3145555-app) | Frontend en React |
-| [`test-manager-library-3145555-page`](https://github.com/code-sena/test-manager-library-3145555-page) | Sitio público estático de presentación |
-| [`test-manager-library-3145555-infra`](https://github.com/code-sena/test-manager-library-3145555-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
-| [`test-manager-library-3145555-tool`](https://github.com/code-sena/test-manager-library-3145555-tool) | Utilidades: sembrador de datos de demostración |
+The API is available under `/api/v1`; public `GET /health` returns `{"status":"ok"}`. API errors use a common `code`, `message`, and `details` shape. Passwords, hashes, SQL queries, and stack traces are never returned.
+
+## Tests
+
+Run `php artisan test`. Unit and contract tests do not require a database connection; integration tests require a separate PostgreSQL test database. Never point tests at a database containing data that must be preserved.
