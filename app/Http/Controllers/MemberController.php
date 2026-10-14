@@ -16,7 +16,7 @@ final class MemberController
     public function index(Request $request): JsonResponse
     {
         $filters = $request->validate([
-            'q' => ['sometimes', 'string', 'max:200'],
+            'q' => ['sometimes', 'nullable', 'string', 'max:200'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'size' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ]);

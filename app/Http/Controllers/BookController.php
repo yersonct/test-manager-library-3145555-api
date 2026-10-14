@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +23,8 @@ final class BookController
     public function index(Request $request): JsonResponse
     {
         $filters = $request->validate([
-            'q' => ['sometimes', 'string', 'max:250'],
-            'category_id' => ['sometimes', 'uuid'],
+            'q' => ['sometimes', 'nullable', 'string', 'max:250'],
+            'category_id' => ['sometimes', 'nullable', 'uuid'],
             'page' => ['sometimes', 'integer', 'min:1'],
             'size' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ]);
@@ -50,7 +51,11 @@ final class BookController
             'title' => ['required', 'string', 'max:250', 'not_regex:/^\s*$/'],
             'author' => ['required', 'string', 'max:200', 'not_regex:/^\s*$/'],
             'isbn' => ['required', 'regex:/^\d{13}$/'],
-            'category_id' => ['required', 'uuid', 'exists:library.category,id'],
+            'category_id' => ['required', 'uuid', function (string $attribute, mixed $value, Closure $fail): void {
+                if (! DB::table('library.category')->where('id', $value)->exists()) {
+                    $fail('La categoría seleccionada no es válida.');
+                }
+            }],
             'total_copies' => ['required', 'integer', 'min:1'],
         ]);
         $book = $this->library->createBook($data);
@@ -63,7 +68,11 @@ final class BookController
         $data = $request->validate([
             'title' => ['required', 'string', 'max:250', 'not_regex:/^\s*$/'],
             'author' => ['required', 'string', 'max:200', 'not_regex:/^\s*$/'],
-            'category_id' => ['required', 'uuid', 'exists:library.category,id'],
+            'category_id' => ['required', 'uuid', function (string $attribute, mixed $value, Closure $fail): void {
+                if (! DB::table('library.category')->where('id', $value)->exists()) {
+                    $fail('La categoría seleccionada no es válida.');
+                }
+            }],
             'total_copies' => ['required', 'integer', 'min:1'],
         ]);
         $book = $this->library->updateBook($id, $data);
