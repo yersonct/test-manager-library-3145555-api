@@ -21,26 +21,26 @@ The initial migration enables `ck_book_total_positive` and `ck_user_role` immedi
 
 All routes except `GET /health` and `POST /api/v1/auth/login` require a Bearer token.
 
-| Method | Route | Access |
-|---|---|---|
-| GET | `/health` | Public |
-| POST | `/api/v1/auth/login` | Public |
-| POST | `/api/v1/users` | admin |
-| GET | `/api/v1/categories` | Authenticated |
-| GET, POST | `/api/v1/books` | Read: authenticated; create: admin |
-| GET, PUT, DELETE | `/api/v1/books/{id}` | Read: authenticated; write: admin |
-| GET, PUT, DELETE | `/api/v1/books/{id}/cover` | Read: authenticated; write: admin |
-| GET, POST | `/api/v1/members` | admin, librarian |
-| GET | `/api/v1/members/{id}` | admin, librarian |
-| GET, POST | `/api/v1/loans` | admin, librarian |
-| GET | `/api/v1/loans/{id}` | admin, librarian |
-| GET | `/api/v1/loans/overdue` | admin, librarian |
-| POST | `/api/v1/loans/{loan_id}/items/{item_id}/return` | admin, librarian |
-| GET | `/api/v1/reports/most-borrowed` | admin |
+| Method           | Route                                            | Access                             |
+| ---------------- | ------------------------------------------------ | ---------------------------------- |
+| GET              | `/health`                                        | Public                             |
+| POST             | `/api/v1/auth/login`                             | Public                             |
+| POST             | `/api/v1/users`                                  | admin                              |
+| GET              | `/api/v1/categories`                             | Authenticated                      |
+| GET, POST        | `/api/v1/books`                                  | Read: authenticated; create: admin |
+| GET, PUT, DELETE | `/api/v1/books/{id}`                             | Read: authenticated; write: admin  |
+| GET, PUT, DELETE | `/api/v1/books/{id}/cover`                       | Read: authenticated; write: admin  |
+| GET, POST        | `/api/v1/members`                                | admin, librarian                   |
+| GET              | `/api/v1/members/{id}`                           | admin, librarian                   |
+| GET, POST        | `/api/v1/loans`                                  | admin, librarian                   |
+| GET              | `/api/v1/loans/{id}`                             | admin, librarian                   |
+| GET              | `/api/v1/loans/overdue`                          | admin, librarian                   |
+| POST             | `/api/v1/loans/{loan_id}/items/{item_id}/return` | admin, librarian                   |
+| GET              | `/api/v1/reports/most-borrowed`                  | admin                              |
 
 ## Setup and run
 
-Requirements: PHP 8.2+ with `pdo_pgsql`, `mbstring`, and `fileinfo`; Composer 2; and PostgreSQL 16. The business schema starts empty. The application migrations create its tables, indexes, constraints, and categories.
+Requirements: PHP 8.4.1+ with `pdo_pgsql`, `mbstring`, and `fileinfo`; Composer 2; and PostgreSQL 16. The business schema starts empty. The application migrations create its tables, indexes, constraints, and categories.
 
 1. Run `composer install`.
 2. Copy `.env.example` to `.env` and set `APP_KEY`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `CORS_ORIGIN`.

@@ -1,5 +1,3 @@
 <?php
 
-use Illuminate\Support\Facades\Schedule;
-
-Schedule::command('schedule:clear-cache')->never();
+// The library API does not define any scheduled tasks.

@@ -4,7 +4,7 @@ COPY composer.json ./
 COPY . .
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader --ignore-platform-req=ext-pdo_pgsql
 
-FROM php:8.3-cli
+FROM php:8.4-cli
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libonig-dev libpq-dev \
     && docker-php-ext-install mbstring pdo_pgsql \
